@@ -43,31 +43,41 @@ export async function POST(request: NextRequest) {
     // スクリーンショットの処理
     let screenshotUrl: string;
     
-    // Vercel Blob Storageが利用可能かチェック
-    const hasBlobToken = !!process.env.BLOB_READ_WRITE_TOKEN;
+    // SVGスクリーンショットの場合（simple-scraperを使用時）
+    const screenshotString = data.screenshot.toString('utf-8');
+    const isSvg = screenshotString.trim().startsWith('<svg');
     
-    if (hasBlobToken) {
-      // 本番環境: Vercel Blobにアップロード
-      try {
-        const screenshotBlob = await put(
-          `screenshots/${Date.now()}.png`,
-          data.screenshot,
-          {
-            access: 'public',
-            contentType: 'image/png',
-          }
-        );
-        screenshotUrl = screenshotBlob.url;
-        console.log('[Scrape API] Screenshot uploaded to blob storage');
-      } catch (blobError) {
-        console.warn('[Scrape API] Blob upload failed, falling back to base64:', blobError);
-        // Blobアップロード失敗時はBase64にフォールバック
-        screenshotUrl = `data:image/png;base64,${data.screenshot.toString('base64')}`;
-      }
+    if (isSvg) {
+      // SVGの場合はdata URIとして直接エンコード
+      screenshotUrl = `data:image/svg+xml;base64,${data.screenshot.toString('base64')}`;
+      console.log('[Scrape API] Using SVG screenshot');
     } else {
-      // 開発環境: Base64エンコードで返す
-      screenshotUrl = `data:image/png;base64,${data.screenshot.toString('base64')}`;
-      console.log('[Scrape API] Using base64 encoding (no blob token)');
+      // Vercel Blob Storageが利用可能かチェック
+      const hasBlobToken = !!process.env.BLOB_READ_WRITE_TOKEN;
+      
+      if (hasBlobToken) {
+        // 本番環境: Vercel Blobにアップロード
+        try {
+          const screenshotBlob = await put(
+            `screenshots/${Date.now()}.png`,
+            data.screenshot,
+            {
+              access: 'public',
+              contentType: 'image/png',
+            }
+          );
+          screenshotUrl = screenshotBlob.url;
+          console.log('[Scrape API] Screenshot uploaded to blob storage');
+        } catch (blobError) {
+          console.warn('[Scrape API] Blob upload failed, falling back to base64:', blobError);
+          // Blobアップロード失敗時はBase64にフォールバック
+          screenshotUrl = `data:image/png;base64,${data.screenshot.toString('base64')}`;
+        }
+      } else {
+        // 開発環境: Base64エンコードで返す
+        screenshotUrl = `data:image/png;base64,${data.screenshot.toString('base64')}`;
+        console.log('[Scrape API] Using base64 encoding (no blob token)');
+      }
     }
 
     // レスポンス
