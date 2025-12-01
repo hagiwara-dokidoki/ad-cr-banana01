@@ -33,7 +33,7 @@ export class WebsiteScraper {
       
       this.browser = await chromium.launch({
         executablePath,
-        headless: chromiumPkg.headless,
+        headless: true,
         args: [
           ...chromiumPkg.args,
           '--no-sandbox',
