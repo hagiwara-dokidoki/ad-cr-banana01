@@ -11,8 +11,5 @@
     "app/api/**/*.tsx": {
       "maxDuration": 60
     }
-  },
-  "env": {
-    "NEXT_PUBLIC_BASE_URL": "@next-public-base-url"
   }
 }
