@@ -32,7 +32,7 @@ export function Step5BannerGeneration({ project, updateProject, onBack }: Step5B
 
       for (let i = 0; i < count; i++) {
         // 1. 背景画像を生成
-        const bgResponse = await fetch('/api/generate-background', {
+        const bgResponse = await fetch('/api/generate/background', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

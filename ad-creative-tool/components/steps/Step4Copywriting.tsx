@@ -49,7 +49,7 @@ export function Step4Copywriting({ project, updateProject, onNext, onBack }: Ste
       }
 
       // コピー生成
-      const response = await fetch('/api/generate-copies', {
+      const response = await fetch('/api/generate/copies', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
