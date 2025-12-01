@@ -3,7 +3,7 @@
  * サイトのスクリーンショット、画像抽出、テキスト取得を行う
  */
 
-import { chromium, Browser, Page } from 'playwright';
+import { chromium, Browser, Page } from 'playwright-chromium';
 import { config } from '../config';
 
 export interface ScrapedData {
