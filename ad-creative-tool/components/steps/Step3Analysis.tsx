@@ -45,7 +45,7 @@ export function Step3Analysis({ project, updateProject, onNext, onBack }: Step3A
       }
 
       // マーケティング分析を実行
-      const response = await fetch('/api/analyze-marketing', {
+      const response = await fetch('/api/analyze/marketing', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
