@@ -9,7 +9,7 @@ export const config = {
   blobToken: process.env.BLOB_READ_WRITE_TOKEN || '',
   
   // API Endpoints
-  geminiModel: 'gemini-1.5-flash',
+  geminiModel: 'gemini-1.5-flash-latest',
   claudeModel: 'claude-3-5-sonnet-20241022',
   imagenModel: 'imagen-3.0-generate-001',
   

@@ -109,7 +109,9 @@ ${data.category ? `- **商材カテゴリ**: ${data.category}` : ''}
 }
 
 /**
- * Imagen 3 で背景画像を生成
+ * 背景画像を生成
+ * 注: Imagen 3はGoogle AI Studio経由では現在利用不可のため、
+ * プレースホルダー画像を生成します
  */
 export async function generateBackground(params: {
   category: string;
@@ -118,35 +120,37 @@ export async function generateBackground(params: {
 }): Promise<string> {
   const dimensions = config.bannerSizes[params.size];
   
-  // Imagen 3のプロンプト構成
-  const prompt = `Product photography style for ${params.category}, ${params.tone} mood, minimalist composition, high quality, 4k, clean background space in the center for text overlay, professional advertising style, negative space for copy placement`;
-
-  // Google AI Studio の Imagen APIを使用
-  const model = genAI.getGenerativeModel({ model: config.imagenModel });
-
-  try {
-    const result = await model.generateContent([
-      {
-        text: prompt,
-      },
-    ]);
-
-    const response = result.response;
-    
-    // Imagenの場合、画像データはresponseに含まれる
-    // 注: 実際のImagen APIの実装に応じて調整が必要
-    if (response.candidates && response.candidates[0]?.content?.parts?.[0]) {
-      const part = response.candidates[0].content.parts[0];
-      
-      // inlineDataがある場合
-      if ('inlineData' in part && part.inlineData) {
-        return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-      }
-    }
-
-    throw new Error('No image data returned from Imagen');
-  } catch (error) {
-    console.error('[Gemini] Image generation error:', error);
-    throw new Error(`Failed to generate background image: ${error instanceof Error ? error.message : 'Unknown error'}`);
-  }
+  // カテゴリとトーンに応じた色を選択
+  const colorSchemes: Record<string, string[]> = {
+    'technology': ['#667eea', '#764ba2'],
+    'fashion': ['#f093fb', '#f5576c'],
+    'food': ['#fa709a', '#fee140'],
+    'health': ['#a8edea', '#fed6e3'],
+    'business': ['#4facfe', '#00f2fe'],
+    'education': ['#43e97b', '#38f9d7'],
+    'default': ['#667eea', '#764ba2'],
+  };
+  
+  const colors = colorSchemes[params.category?.toLowerCase()] || colorSchemes.default;
+  
+  // SVGでグラデーション背景を生成
+  const svg = `
+    <svg width="${dimensions.width}" height="${dimensions.height}" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:${colors[0]};stop-opacity:1" />
+          <stop offset="100%" style="stop-color:${colors[1]};stop-opacity:1" />
+        </linearGradient>
+        <filter id="noise">
+          <feTurbulence baseFrequency="0.9" numOctaves="4" />
+          <feColorMatrix type="saturate" values="0"/>
+        </filter>
+      </defs>
+      <rect width="${dimensions.width}" height="${dimensions.height}" fill="url(#bg)"/>
+      <rect width="${dimensions.width}" height="${dimensions.height}" fill="white" opacity="0.05" filter="url(#noise)"/>
+    </svg>
+  `;
+  
+  const base64 = Buffer.from(svg).toString('base64');
+  return `data:image/svg+xml;base64,${base64}`;
 }
