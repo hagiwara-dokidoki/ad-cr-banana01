@@ -14,11 +14,11 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.0",
     "@google/generative-ai": "^0.24.1",
-    "@sparticuz/chromium": "^131.0.2",
+    "@sparticuz/chromium": "^128.0.0",
     "@vercel/blob": "^2.0.0",
     "@vercel/og": "^0.8.5",
     "next": "16.0.6",
-    "playwright-core": "^1.57.0",
+    "playwright-core": "^1.48.2",
     "react": "19.2.0",
     "react-dom": "19.2.0"
   },
