@@ -131,25 +131,56 @@ export class WebsiteScraper {
    * （実際のスクリーンショットの代わりに、シンプルな画像を生成）
    */
   private async generateDummyScreenshot(title: string): Promise<Buffer> {
-    // SVGで簡易的なプレースホルダーを生成
+    // より見栄えの良いSVGプレビューを生成
     const svg = `
       <svg width="1200" height="800" xmlns="http://www.w3.org/2000/svg">
-        <rect width="1200" height="800" fill="#f0f0f0"/>
-        <text x="50%" y="50%" 
-              font-family="Arial, sans-serif" 
-              font-size="24" 
-              fill="#333" 
-              text-anchor="middle" 
-              dominant-baseline="middle">
-          ${this.escapeXml(title)}
+        <!-- グラデーション背景 -->
+        <defs>
+          <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <rect width="1200" height="800" fill="url(#bg)"/>
+        
+        <!-- 中央のカード -->
+        <rect x="150" y="200" width="900" height="400" rx="20" fill="white" opacity="0.95"/>
+        
+        <!-- ブラウザバーのシミュレーション -->
+        <rect x="150" y="200" width="900" height="50" rx="20" fill="#e2e8f0"/>
+        <rect x="150" y="230" width="900" height="370" rx="0 0 20 20" fill="white"/>
+        
+        <!-- ブラウザドット -->
+        <circle cx="180" cy="225" r="8" fill="#ff5f57"/>
+        <circle cx="210" cy="225" r="8" fill="#febc2e"/>
+        <circle cx="240" cy="225" r="8" fill="#28c840"/>
+        
+        <!-- タイトルテキスト -->
+        <text x="600" y="350" 
+              font-family="system-ui, -apple-system, sans-serif" 
+              font-size="32" 
+              font-weight="600"
+              fill="#1a202c" 
+              text-anchor="middle">
+          ${this.escapeXml(title.slice(0, 50))}
         </text>
-        <text x="50%" y="60%" 
-              font-family="Arial, sans-serif" 
+        
+        <!-- サブテキスト -->
+        <text x="600" y="420" 
+              font-family="system-ui, -apple-system, sans-serif" 
+              font-size="18" 
+              fill="#718096" 
+              text-anchor="middle">
+          Webサイトプレビュー
+        </text>
+        
+        <!-- フッター説明 -->
+        <text x="600" y="480" 
+              font-family="system-ui, -apple-system, sans-serif" 
               font-size="14" 
-              fill="#666" 
-              text-anchor="middle" 
-              dominant-baseline="middle">
-          Website Preview (スクリーンショット機能は開発中)
+              fill="#a0aec0" 
+              text-anchor="middle">
+          ※ サーバーレス環境のため、スクリーンショット機能は簡易表示されています
         </text>
       </svg>
     `;
