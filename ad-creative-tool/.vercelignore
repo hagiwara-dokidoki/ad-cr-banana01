@@ -1,0 +1,25 @@
+# Vercel デプロイ時に無視するファイル
+
+# Development files
+.env.local
+.env*.local
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Tests
+__tests__/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
