@@ -4,7 +4,7 @@
  */
 
 import puppeteer, { Browser, Page } from 'puppeteer-core';
-import chromium from '@sparticuz/chromium';
+import chromium from 'chrome-aws-lambda';
 import { config } from '../config';
 
 export interface ScrapedData {
@@ -28,13 +28,11 @@ export class WebsiteScraper {
    */
   async init() {
     if (!this.browser) {
-      const executablePath = await chromium.executablePath();
-
       this.browser = await puppeteer.launch({
-        executablePath,
-        headless: true,
         args: chromium.args,
         defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath,
+        headless: chromium.headless,
       });
     }
   }
