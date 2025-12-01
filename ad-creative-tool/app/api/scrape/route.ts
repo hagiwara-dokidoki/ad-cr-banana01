@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getScraper } from '@/lib/scraper/playwright-scraper';
+import { getScraper } from '@/lib/scraper/puppeteer-scraper';
 import { put } from '@vercel/blob';
 
 export const maxDuration = 60; // Vercel Pro: 最大60秒
