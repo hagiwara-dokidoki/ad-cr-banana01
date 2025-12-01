@@ -34,34 +34,53 @@ export async function POST(request: NextRequest) {
     // 背景画像を生成
     const imageData = await generateBackground({ category, tone, size });
 
-    // Base64データをBufferに変換
-    let imageBuffer: Buffer;
-    if (imageData.startsWith('data:')) {
-      // data URL形式
-      const base64Data = imageData.split(',')[1];
-      imageBuffer = Buffer.from(base64Data, 'base64');
-    } else {
-      // その他の形式（URLの場合はfetchする）
-      const response = await fetch(imageData);
-      const arrayBuffer = await response.arrayBuffer();
-      imageBuffer = Buffer.from(arrayBuffer);
-    }
+    // 画像URLの処理
+    let finalImageUrl: string;
+    
+    // Vercel Blob Storageが利用可能かチェック
+    const hasBlobToken = !!process.env.BLOB_READ_WRITE_TOKEN;
+    
+    if (hasBlobToken) {
+      // 本番環境: Vercel Blobにアップロード
+      try {
+        // Base64データをBufferに変換
+        let imageBuffer: Buffer;
+        if (imageData.startsWith('data:')) {
+          // data URL形式
+          const base64Data = imageData.split(',')[1];
+          imageBuffer = Buffer.from(base64Data, 'base64');
+        } else {
+          // その他の形式（URLの場合はfetchする）
+          const response = await fetch(imageData);
+          const arrayBuffer = await response.arrayBuffer();
+          imageBuffer = Buffer.from(arrayBuffer);
+        }
 
-    // Vercel Blobにアップロード
-    const blob = await put(
-      `backgrounds/${Date.now()}-${size}.png`,
-      imageBuffer,
-      {
-        access: 'public',
-        contentType: 'image/png',
+        const blob = await put(
+          `backgrounds/${Date.now()}-${size}.png`,
+          imageBuffer,
+          {
+            access: 'public',
+            contentType: 'image/png',
+          }
+        );
+        
+        finalImageUrl = blob.url;
+        console.log('[Background Generation API] Background uploaded to:', blob.url);
+      } catch (blobError) {
+        console.warn('[Background Generation API] Blob upload failed, using original URL:', blobError);
+        // Blobアップロード失敗時は元のURLを使用
+        finalImageUrl = imageData;
       }
-    );
-
-    console.log('[Background Generation API] Background uploaded to:', blob.url);
+    } else {
+      // 開発環境: 生成されたURLをそのまま返す
+      finalImageUrl = imageData;
+      console.log('[Background Generation API] Using direct URL (no blob token)');
+    }
 
     return NextResponse.json({
       success: true,
-      imageUrl: blob.url,
+      imageUrl: finalImageUrl,
     });
 
   } catch (error) {

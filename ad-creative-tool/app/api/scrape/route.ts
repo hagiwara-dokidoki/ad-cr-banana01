@@ -40,17 +40,35 @@ export async function POST(request: NextRequest) {
 
     console.log('[Scrape API] Scraping completed');
 
-    // スクリーンショットをVercel Blobにアップロード
-    const screenshotBlob = await put(
-      `screenshots/${Date.now()}.png`,
-      data.screenshot,
-      {
-        access: 'public',
-        contentType: 'image/png',
+    // スクリーンショットの処理
+    let screenshotUrl: string;
+    
+    // Vercel Blob Storageが利用可能かチェック
+    const hasBlobToken = !!process.env.BLOB_READ_WRITE_TOKEN;
+    
+    if (hasBlobToken) {
+      // 本番環境: Vercel Blobにアップロード
+      try {
+        const screenshotBlob = await put(
+          `screenshots/${Date.now()}.png`,
+          data.screenshot,
+          {
+            access: 'public',
+            contentType: 'image/png',
+          }
+        );
+        screenshotUrl = screenshotBlob.url;
+        console.log('[Scrape API] Screenshot uploaded to blob storage');
+      } catch (blobError) {
+        console.warn('[Scrape API] Blob upload failed, falling back to base64:', blobError);
+        // Blobアップロード失敗時はBase64にフォールバック
+        screenshotUrl = `data:image/png;base64,${data.screenshot.toString('base64')}`;
       }
-    );
-
-    console.log('[Scrape API] Screenshot uploaded to blob storage');
+    } else {
+      // 開発環境: Base64エンコードで返す
+      screenshotUrl = `data:image/png;base64,${data.screenshot.toString('base64')}`;
+      console.log('[Scrape API] Using base64 encoding (no blob token)');
+    }
 
     // レスポンス
     return NextResponse.json({
@@ -58,7 +76,7 @@ export async function POST(request: NextRequest) {
       data: {
         title: data.title,
         description: data.description,
-        screenshot: screenshotBlob.url,
+        screenshot: screenshotUrl,
         images: data.images,
         textContent: data.textContent,
       },
