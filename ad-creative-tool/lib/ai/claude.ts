@@ -139,3 +139,64 @@ ${feedback}
 
   return refinedCopy;
 }
+
+/**
+ * マーケティング分析を実行（Geminiの代替）
+ */
+export async function analyzeMarketingWithClaude(data: {
+  title: string;
+  description: string;
+  textContent: {
+    h1: string[];
+    h2: string[];
+    paragraphs: string[];
+  };
+  category?: string;
+}): Promise<AnalysisResult> {
+  const prompt = `以下のWebサイト情報を分析し、マーケティングの観点から詳細な分析を行ってください：
+
+# Webサイト情報
+- **タイトル**: ${data.title}
+- **説明**: ${data.description}
+- **見出し (H1)**: ${data.textContent.h1.join(', ')}
+- **見出し (H2)**: ${data.textContent.h2.slice(0, 5).join(', ')}
+- **本文**: ${data.textContent.paragraphs.slice(0, 3).join(' ')}
+${data.category ? `- **商材カテゴリ**: ${data.category}` : ''}
+
+以下の項目を含むJSON形式で分析結果を返してください（他のテキストは含めないでください）：
+
+{
+  "competitors": ["競合企業1", "競合企業2", "競合企業3"],
+  "strengths": ["強み1", "強み2", "強み3"],
+  "target": "ターゲットペルソナの詳細な説明（性別、年齢層、悩み、課題など）",
+  "brandTone": "ブランドトーンの説明（例：信頼感、親しみやすさ、先進性など）"
+}
+
+※ 実際のビジネス環境を考慮した現実的な分析を行ってください。`;
+
+  const message = await anthropic.messages.create({
+    model: config.claudeModel,
+    max_tokens: 2048,
+    temperature: 0.3,
+    messages: [
+      {
+        role: 'user',
+        content: prompt,
+      },
+    ],
+  });
+
+  const responseText = message.content[0].type === 'text' 
+    ? message.content[0].text 
+    : '';
+  
+  // JSONを抽出
+  const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    throw new Error('Failed to parse analysis data from Claude response');
+  }
+
+  const analysis = JSON.parse(jsonMatch[0]) as AnalysisResult;
+
+  return analysis;
+}

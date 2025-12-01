@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { analyzeMarketing } from '@/lib/ai/gemini';
+import { analyzeMarketingWithClaude } from '@/lib/ai/claude';
 
 export const maxDuration = 30;
 
@@ -21,16 +21,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('[Marketing Analysis API] Analyzing website:', title);
+    console.log('[Marketing Analysis API] Analyzing website with Claude:', title);
 
-    const analysis = await analyzeMarketing({
+    const analysis = await analyzeMarketingWithClaude({
       title,
       description: description || '',
       textContent,
       category,
     });
 
-    console.log('[Marketing Analysis API] Analysis completed');
+    console.log('[Marketing Analysis API] Claude analysis completed');
 
     return NextResponse.json({
       success: true,
