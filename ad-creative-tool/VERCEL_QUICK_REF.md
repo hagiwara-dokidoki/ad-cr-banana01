@@ -18,12 +18,15 @@ Settings > Git > Production Branch
 → main
 ```
 
-### **3️⃣ 環境変数（2つ）**
+### **3️⃣ 環境変数（2つだけ！）**
 ```
 Settings > Environment Variables
 
 GOOGLE_AI_API_KEY=AIzaSy...
 ANTHROPIC_API_KEY=sk-ant-...
+
+※ NEXT_PUBLIC_BASE_URL は不要（自動検出）
+※ BLOB_READ_WRITE_TOKEN は自動設定
 ```
 
 ### **4️⃣ Blob Storage**
