@@ -23,6 +23,19 @@ export async function POST(request: NextRequest) {
 
     console.log('[Color Analysis API] Extracting colors from:', imageUrl);
 
+    // SVGプレースホルダーの場合はデフォルトカラーを返す
+    if (imageUrl.startsWith('data:image/svg')) {
+      console.log('[Color Analysis API] SVG placeholder detected, using default colors');
+      return NextResponse.json({
+        success: true,
+        colors: {
+          main: '#3B82F6',    // ブルー
+          accent: '#F59E0B',  // オレンジ
+          base: '#F3F4F6',    // グレー
+        },
+      });
+    }
+
     const colors = await extractColors(imageUrl);
 
     console.log('[Color Analysis API] Colors extracted:', colors);
@@ -35,12 +48,15 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('[Color Analysis API] Error:', error);
     
-    return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
+    // エラー時はデフォルトカラーを返す
+    console.log('[Color Analysis API] Using fallback colors due to error');
+    return NextResponse.json({
+      success: true,
+      colors: {
+        main: '#3B82F6',
+        accent: '#F59E0B',
+        base: '#F3F4F6',
       },
-      { status: 500 }
-    );
+    });
   }
 }
