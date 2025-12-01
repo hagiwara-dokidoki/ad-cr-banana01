@@ -3,7 +3,8 @@
  * サイトのスクリーンショット、画像抽出、テキスト取得を行う
  */
 
-import { chromium, Browser, Page } from 'playwright-chromium';
+import { chromium, Browser, Page } from 'playwright-core';
+import chromiumPkg from '@sparticuz/chromium';
 import { config } from '../config';
 
 export interface ScrapedData {
@@ -27,9 +28,19 @@ export class WebsiteScraper {
    */
   async init() {
     if (!this.browser) {
+      // Vercel環境では @sparticuz/chromium を使用
+      const executablePath = await chromiumPkg.executablePath();
+      
       this.browser = await chromium.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        executablePath,
+        headless: chromiumPkg.headless,
+        args: [
+          ...chromiumPkg.args,
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-gpu',
+        ],
       });
     }
   }
