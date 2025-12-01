@@ -14,7 +14,9 @@ export const config = {
   imagenModel: 'imagen-3.0-generate-001',
   
   // Application Settings
-  baseUrl: process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000',
+  // Vercel automatically provides VERCEL_URL in production
+  baseUrl: process.env.NEXT_PUBLIC_BASE_URL || 
+           (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'),
   
   // Generation Settings
   maxCopyCandidates: 20,
