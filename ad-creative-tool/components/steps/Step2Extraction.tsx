@@ -80,7 +80,7 @@ export function Step2Extraction({ project, updateProject, onNext, onBack }: Step
     
     setAnalyzing(true);
     try {
-      const response = await fetch('/api/analyze-colors', {
+      const response = await fetch('/api/analyze/colors', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ imageUrl: project.screenshot }),
