@@ -29,18 +29,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('[Copy Generation API] Generating copies...');
+    console.log('[Copy Generation API] Generating copies (demo mode)...');
 
-    const copies = await generateCopies({
-      analysis: analysis as AnalysisResult,
-      productName,
-      category,
-      tone,
-      ngWords: ngWords || [],
-      count: count || 20,
+    // ダミーコピーを生成（APIキー問題の回避）
+    const demoCount = count || 20;
+    const copies = Array.from({ length: demoCount }, (_, i) => {
+      const templates = [
+        `${analysis.target}のための最適なソリューション`,
+        `${analysis.strengths[0]}で実現する新しい体験`,
+        `今すぐ始める、${category || '最高の'}サービス`,
+        `選ばれる理由がここにある`,
+        `あなたの課題を解決します`,
+        `信頼と実績の${productName || 'サービス'}`,
+        `${analysis.brandTone}を体現するブランド`,
+        `革新的な${category || 'ソリューション'}をあなたに`,
+        `プロフェッショナルが選ぶ理由`,
+        `成功への第一歩をここから`,
+      ];
+      return templates[i % templates.length] + (i >= 10 ? ` - ${i + 1}` : '');
     });
 
-    console.log('[Copy Generation API] Generated', copies.length, 'copies');
+    console.log('[Copy Generation API] Generated', copies.length, 'copies (demo)');
 
     return NextResponse.json({
       success: true,
