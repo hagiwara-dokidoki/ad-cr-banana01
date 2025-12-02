@@ -77,6 +77,8 @@ export async function GET(request: NextRequest) {
             <img
               src={bg}
               alt="background"
+              width={width}
+              height={height}
               style={{
                 position: 'absolute',
                 top: 0,

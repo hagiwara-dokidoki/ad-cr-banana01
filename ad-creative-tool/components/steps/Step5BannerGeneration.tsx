@@ -42,6 +42,15 @@ export function Step5BannerGeneration({ project, updateProject, onBack }: Step5B
           const imageIndex = i % extractedImages.length;
           backgroundImageUrl = extractedImages[imageIndex];
           console.log(`[Banner ${i}] Using extracted image:`, backgroundImageUrl);
+        } else {
+          // テスト用: 抽出画像がない場合は、テスト画像を使用
+          const testImages = [
+            'https://images.unsplash.com/photo-1661956602116-aa6865609028?w=1080',
+            'https://images.unsplash.com/photo-1661956602153-23384936a1d3?w=1080',
+            'https://images.unsplash.com/photo-1661956602868-6ae368943878?w=1080',
+          ];
+          backgroundImageUrl = testImages[i % testImages.length];
+          console.log(`[Banner ${i}] Using test image:`, backgroundImageUrl);
         }
 
         // テキストを合成してバナーを生成
