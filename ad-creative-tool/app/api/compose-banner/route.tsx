@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
             />
           )}
 
-          {/* Dark Overlay for Better Text Readability */}
+          {/* Subtle Overlay for Better Text Readability */}
           <div
             style={{
               position: 'absolute',
@@ -106,8 +106,8 @@ export async function GET(request: NextRequest) {
               width: '100%',
               height: '100%',
               background: hasBackgroundImage
-                ? 'radial-gradient(circle, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.7) 100%)'
-                : 'radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 100%)',
+                ? 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.4) 100%)'
+                : 'radial-gradient(circle, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 100%)',
               display: 'flex',
             }}
           />
@@ -131,7 +131,7 @@ export async function GET(request: NextRequest) {
                 fontSize: `${fontSize}px`,
                 fontWeight: 900,
                 color: '#FFFFFF',
-                textShadow: '0 8px 16px rgba(0,0,0,0.8), 0 4px 8px rgba(0,0,0,0.6)',
+                textShadow: '0 4px 12px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.3)',
                 lineHeight: 1.2,
                 letterSpacing: '-0.02em',
               }}

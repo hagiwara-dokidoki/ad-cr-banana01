@@ -86,7 +86,7 @@ export function Step5BannerGeneration({ project, updateProject, onBack }: Step5B
         const bannerUrl = `/api/compose-banner?${params.toString()}`;
 
         const banner: Banner = {
-          id: `banner-${Date.now()}-${i}`,
+          id: `banner-${Date.now()}-${Math.random().toString(36).substr(2, 9)}-${i}`,
           size,
           backgroundUrl: backgroundImageUrl || 'gradient',
           textOverlay: project.selectedCopy,
@@ -97,7 +97,7 @@ export function Step5BannerGeneration({ project, updateProject, onBack }: Step5B
         newBanners.push(banner);
         
         // 各バナー生成の間に少し待機（タイムスタンプの重複を避ける）
-        await new Promise(resolve => setTimeout(resolve, 10));
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
 
       const updatedBanners = [...banners, ...newBanners];
