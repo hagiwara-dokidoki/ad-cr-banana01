@@ -13,26 +13,32 @@ export const maxDuration = 60;
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { category, tone, size } = body;
+    const { category, tone, size, brandTone } = body;
 
-    if (!category || !tone || !size) {
-      return NextResponse.json(
-        { success: false, error: 'Category, tone, and size are required' },
-        { status: 400 }
-      );
-    }
+    // デフォルト値を設定（オプショナル対応）
+    const finalCategory = category || 'business';
+    const finalTone = tone || brandTone || 'professional';
+    const finalSize = size || 'square';
 
-    if (size !== 'square' && size !== 'vertical') {
+    if (finalSize !== 'square' && finalSize !== 'vertical') {
       return NextResponse.json(
         { success: false, error: 'Invalid size. Must be "square" or "vertical"' },
         { status: 400 }
       );
     }
 
-    console.log('[Background Generation API] Generating background:', { category, tone, size });
+    console.log('[Background Generation API] Generating background:', { 
+      category: finalCategory, 
+      tone: finalTone, 
+      size: finalSize 
+    });
 
     // 背景画像を生成
-    const imageData = await generateBackground({ category, tone, size });
+    const imageData = await generateBackground({ 
+      category: finalCategory, 
+      tone: finalTone, 
+      size: finalSize 
+    });
 
     // 画像URLの処理
     let finalImageUrl: string;
