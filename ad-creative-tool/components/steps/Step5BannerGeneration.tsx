@@ -37,21 +37,26 @@ export function Step5BannerGeneration({ project, updateProject, onBack }: Step5B
       for (let i = 0; i < count; i++) {
         let backgroundImageUrl = '';
         
-        if (useExtractedImages) {
-          // 抽出画像をローテーションで使用
-          const imageIndex = i % extractedImages.length;
-          backgroundImageUrl = extractedImages[imageIndex];
-          console.log(`[Banner ${i}] Using extracted image:`, backgroundImageUrl);
-        } else {
-          // テスト用: 抽出画像がない場合は、テスト画像を使用
-          const testImages = [
-            'https://images.unsplash.com/photo-1661956602116-aa6865609028?w=1080',
-            'https://images.unsplash.com/photo-1661956602153-23384936a1d3?w=1080',
-            'https://images.unsplash.com/photo-1661956602868-6ae368943878?w=1080',
-          ];
-          backgroundImageUrl = testImages[i % testImages.length];
-          console.log(`[Banner ${i}] Using test image:`, backgroundImageUrl);
-        }
+        // テスト用: 常にテスト画像を使用（WebP画像の問題を回避）
+        const testImages = [
+          'https://images.unsplash.com/photo-1661956602116-aa6865609028?w=1080',
+          'https://images.unsplash.com/photo-1661956602153-23384936a1d3?w=1080',
+          'https://images.unsplash.com/photo-1661956602868-6ae368943878?w=1080',
+        ];
+        backgroundImageUrl = testImages[i % testImages.length];
+        console.log(`[Banner ${i}] Using test image (forced):`, backgroundImageUrl);
+        
+        // 以下は一時的にコメントアウト
+        // if (useExtractedImages) {
+        //   // 抽出画像をローテーションで使用
+        //   const imageIndex = i % extractedImages.length;
+        //   backgroundImageUrl = extractedImages[imageIndex];
+        //   console.log(`[Banner ${i}] Using extracted image:`, backgroundImageUrl);
+        // } else {
+        //   // テスト用: 抽出画像がない場合は、テスト画像を使用
+        //   backgroundImageUrl = testImages[i % testImages.length];
+        //   console.log(`[Banner ${i}] Using test image:`, backgroundImageUrl);
+        // }
 
         // テキストを合成してバナーを生成
         const params = new URLSearchParams({

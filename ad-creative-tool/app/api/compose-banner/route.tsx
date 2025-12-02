@@ -44,11 +44,18 @@ export async function GET(request: NextRequest) {
     // 背景を決定: 外部画像 or グラデーション
     let backgroundStyle: any = {};
     let hasBackgroundImage = false;
+    let processedBg = bg;
     
     if (bg && (bg.startsWith('http://') || bg.startsWith('https://'))) {
       // 外部画像URLの場合、imgタグを使用
       hasBackgroundImage = true;
+      
+      // WebP画像の場合、JPGに変換を試みる（可能であれば）
+      // ただし、まずはそのまま使用してみる
       console.log('[compose-banner] Using external image:', bg.substring(0, 100));
+      console.log('[compose-banner] Image format:', bg.split('.').pop());
+      
+      processedBg = bg;
     } else {
       // 背景がない場合はグラデーション
       backgroundStyle = {
@@ -73,9 +80,9 @@ export async function GET(request: NextRequest) {
           }}
         >
           {/* Background Image (if provided) */}
-          {hasBackgroundImage && bg && (
+          {hasBackgroundImage && processedBg && (
             <img
-              src={bg}
+              src={processedBg}
               alt="background"
               width={width}
               height={height}
