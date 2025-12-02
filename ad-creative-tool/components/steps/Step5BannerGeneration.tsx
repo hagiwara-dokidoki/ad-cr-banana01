@@ -32,7 +32,6 @@ export function Step5BannerGeneration({ project, updateProject, onBack }: Step5B
       
       // 抽出した画像を使用（存在する場合）
       const extractedImages = project.extractedImages || [];
-      const useExtractedImages = extractedImages.length > 0;
 
       // WebP画像をフィルタリング（@vercel/ogが対応していないため）
       const nonWebPImages = extractedImages.filter(url => {
