@@ -25,6 +25,30 @@ export async function GET(request: NextRequest) {
     // フォントサイズをサイズに応じて調整
     const fontSize = size === 'square' ? 80 : 100;
 
+    // 背景を決定（SVG data URIまたはグラデーション）
+    let backgroundStyle: any = {};
+    
+    if (bg && bg.startsWith('data:image/svg+xml')) {
+      // SVG data URIの場合、そのまま背景画像として使用
+      backgroundStyle = {
+        backgroundImage: `url("${bg}")`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      };
+    } else if (bg) {
+      // 通常の画像URLの場合
+      backgroundStyle = {
+        backgroundImage: `url("${bg}")`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      };
+    } else {
+      // 背景がない場合はデフォルトグラデーション
+      backgroundStyle = {
+        background: `linear-gradient(135deg, ${color}22 0%, ${color}88 100%)`,
+      };
+    }
+
     return new ImageResponse(
       (
         <div
@@ -37,51 +61,21 @@ export async function GET(request: NextRequest) {
             justifyContent: 'center',
             position: 'relative',
             fontFamily: 'sans-serif',
+            ...backgroundStyle,
           }}
         >
-          {/* Background - SVG gradient or image */}
-          {bg && bg.startsWith('data:image/svg+xml') ? (
-            // SVGの場合はそのまま使用
-            <div
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-              }}
-              dangerouslySetInnerHTML={{
-                __html: decodeURIComponent(bg.replace('data:image/svg+xml,', '')),
-              }}
-            />
-          ) : bg ? (
-            // 通常の画像URLの場合
-            <img
-              src={bg}
-              alt="background"
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-              }}
-            />
-          ) : (
-            // 背景がない場合はデフォルトグラデーション
-            <div
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                background: `linear-gradient(135deg, ${color}22 0%, ${color}88 100%)`,
-              }}
-            />
-          )}
+          {/* Dark Overlay for Better Text Readability */}
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              background: 'radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 100%)',
+              display: 'flex',
+            }}
+          />
 
           {/* Text Overlay with Shadow */}
           <div
@@ -102,28 +96,14 @@ export async function GET(request: NextRequest) {
                 fontSize: `${fontSize}px`,
                 fontWeight: 900,
                 color: '#FFFFFF',
-                textShadow: '0 4px 12px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.3)',
+                textShadow: '0 8px 16px rgba(0,0,0,0.8), 0 4px 8px rgba(0,0,0,0.6)',
                 lineHeight: 1.2,
-                wordWrap: 'break-word',
                 letterSpacing: '-0.02em',
               }}
             >
               {text}
             </div>
           </div>
-
-          {/* Subtle Overlay for Better Text Readability */}
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              background: 'radial-gradient(circle, transparent 30%, rgba(0,0,0,0.3) 100%)',
-              zIndex: 1,
-            }}
-          />
         </div>
       ),
       {
