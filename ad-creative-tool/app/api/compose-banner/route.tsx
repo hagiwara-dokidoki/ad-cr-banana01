@@ -39,10 +39,20 @@ export async function GET(request: NextRequest) {
     
     const colors = colorSchemes[category?.toLowerCase()] || colorSchemes.default;
 
-    // 背景グラデーションを決定
-    let backgroundStyle: any = {
-      background: `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 100%)`,
-    };
+    // 背景を決定: 外部画像 or グラデーション
+    let backgroundStyle: any = {};
+    let hasBackgroundImage = false;
+    
+    if (bg && (bg.startsWith('http://') || bg.startsWith('https://'))) {
+      // 外部画像URLの場合
+      hasBackgroundImage = true;
+      // @vercel/og では img タグを使う必要がある
+    } else {
+      // 背景がない場合はグラデーション
+      backgroundStyle = {
+        background: `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 100%)`,
+      };
+    }
 
     return new ImageResponse(
       (
@@ -59,6 +69,22 @@ export async function GET(request: NextRequest) {
             ...backgroundStyle,
           }}
         >
+          {/* Background Image (if provided) */}
+          {hasBackgroundImage && bg && (
+            <img
+              src={bg}
+              alt="background"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+              }}
+            />
+          )}
+
           {/* Dark Overlay for Better Text Readability */}
           <div
             style={{
@@ -67,7 +93,9 @@ export async function GET(request: NextRequest) {
               left: 0,
               width: '100%',
               height: '100%',
-              background: 'radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 100%)',
+              background: hasBackgroundImage
+                ? 'radial-gradient(circle, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.7) 100%)'
+                : 'radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 100%)',
               display: 'flex',
             }}
           />
