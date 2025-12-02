@@ -52,9 +52,11 @@ export function Step5BannerGeneration({ project, updateProject, onBack }: Step5B
         // 2. テキストを合成してバナーを生成
         const bannerUrl = `/api/compose-banner?text=${encodeURIComponent(
           project.selectedCopy
-        )}&bg=${encodeURIComponent(bgResult.imageUrl)}&color=${encodeURIComponent(
+        )}&color=${encodeURIComponent(
           project.colors.accent
-        )}&size=${size}`;
+        )}&size=${size}&category=${encodeURIComponent(
+          project.options?.category || 'business'
+        )}`;
 
         const banner: Banner = {
           id: `banner-${Date.now()}-${i}`,

@@ -17,6 +17,7 @@ export async function GET(request: NextRequest) {
     const bg = searchParams.get('bg') || '';
     const color = searchParams.get('color') || '#3B82F6';
     const size = searchParams.get('size') || 'square';
+    const category = searchParams.get('category') || 'business';
 
     // サイズを決定
     const width = 1080;
@@ -25,29 +26,23 @@ export async function GET(request: NextRequest) {
     // フォントサイズをサイズに応じて調整
     const fontSize = size === 'square' ? 80 : 100;
 
-    // 背景を決定（SVG data URIまたはグラデーション）
-    let backgroundStyle: any = {};
+    // カテゴリとトーンに応じた色を選択
+    const colorSchemes: Record<string, [string, string]> = {
+      'technology': ['#667eea', '#764ba2'],
+      'fashion': ['#f093fb', '#f5576c'],
+      'food': ['#fa709a', '#fee140'],
+      'health': ['#a8edea', '#fed6e3'],
+      'business': ['#4facfe', '#00f2fe'],
+      'education': ['#43e97b', '#38f9d7'],
+      'default': ['#667eea', '#764ba2'],
+    };
     
-    if (bg && bg.startsWith('data:image/svg+xml')) {
-      // SVG data URIの場合、そのまま背景画像として使用
-      backgroundStyle = {
-        backgroundImage: `url("${bg}")`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      };
-    } else if (bg) {
-      // 通常の画像URLの場合
-      backgroundStyle = {
-        backgroundImage: `url("${bg}")`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      };
-    } else {
-      // 背景がない場合はデフォルトグラデーション
-      backgroundStyle = {
-        background: `linear-gradient(135deg, ${color}22 0%, ${color}88 100%)`,
-      };
-    }
+    const colors = colorSchemes[category?.toLowerCase()] || colorSchemes.default;
+
+    // 背景グラデーションを決定
+    let backgroundStyle: any = {
+      background: `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 100%)`,
+    };
 
     return new ImageResponse(
       (
