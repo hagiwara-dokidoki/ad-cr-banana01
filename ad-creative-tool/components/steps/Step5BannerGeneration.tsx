@@ -29,45 +29,48 @@ export function Step5BannerGeneration({ project, updateProject, onBack }: Step5B
     setGenerating(true);
     try {
       const newBanners: Banner[] = [];
+      
+      // 抽出した画像を使用（存在する場合）
+      const extractedImages = project.extractedImages || [];
+      const useExtractedImages = extractedImages.length > 0;
 
       for (let i = 0; i < count; i++) {
-        // 1. 背景画像を生成
-        const bgResponse = await fetch('/api/generate/background', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            category: project.options?.category,
-            tone: project.options?.tone,
-            brandTone: project.analysis?.brandTone,
-            size,
-          }),
-        });
-
-        const bgResult = await bgResponse.json();
-
-        if (!bgResult.success) {
-          throw new Error(bgResult.error);
+        let backgroundImageUrl = '';
+        
+        if (useExtractedImages) {
+          // 抽出画像をローテーションで使用
+          const imageIndex = i % extractedImages.length;
+          backgroundImageUrl = extractedImages[imageIndex];
         }
 
-        // 2. テキストを合成してバナーを生成
-        const bannerUrl = `/api/compose-banner?text=${encodeURIComponent(
-          project.selectedCopy
-        )}&color=${encodeURIComponent(
-          project.colors.accent
-        )}&size=${size}&category=${encodeURIComponent(
-          project.options?.category || 'business'
-        )}`;
+        // テキストを合成してバナーを生成
+        const params = new URLSearchParams({
+          text: project.selectedCopy,
+          color: project.colors.accent,
+          size: size,
+          category: project.options?.category || 'business',
+        });
+        
+        // 抽出画像がある場合はbgパラメータを追加
+        if (backgroundImageUrl) {
+          params.append('bg', backgroundImageUrl);
+        }
+
+        const bannerUrl = `/api/compose-banner?${params.toString()}`;
 
         const banner: Banner = {
           id: `banner-${Date.now()}-${i}`,
           size,
-          backgroundUrl: bgResult.imageUrl,
+          backgroundUrl: backgroundImageUrl || 'gradient',
           textOverlay: project.selectedCopy,
           finalImageUrl: bannerUrl,
           createdAt: new Date(),
         };
 
         newBanners.push(banner);
+        
+        // 各バナー生成の間に少し待機（タイムスタンプの重複を避ける）
+        await new Promise(resolve => setTimeout(resolve, 10));
       }
 
       const updatedBanners = [...banners, ...newBanners];

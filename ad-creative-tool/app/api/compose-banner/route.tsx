@@ -44,9 +44,8 @@ export async function GET(request: NextRequest) {
     let hasBackgroundImage = false;
     
     if (bg && (bg.startsWith('http://') || bg.startsWith('https://'))) {
-      // 外部画像URLの場合
+      // 外部画像URLの場合、imgタグを使用
       hasBackgroundImage = true;
-      // @vercel/og では img タグを使う必要がある
     } else {
       // 背景がない場合はグラデーション
       backgroundStyle = {
