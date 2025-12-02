@@ -11,7 +11,7 @@ export const config = {
   // API Endpoints
   // gemini-pro is the most stable model available
   geminiModel: 'gemini-pro',
-  claudeModel: 'claude-3-5-sonnet-20241022',
+  claudeModel: 'claude-3-5-sonnet-20240620',
   imagenModel: 'imagen-3.0-generate-001',
   
   // Application Settings
