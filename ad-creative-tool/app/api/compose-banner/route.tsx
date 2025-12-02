@@ -19,6 +19,8 @@ export async function GET(request: NextRequest) {
     const size = searchParams.get('size') || 'square';
     const category = searchParams.get('category') || 'business';
 
+    console.log('[compose-banner] Parameters:', { text, bg: bg ? bg.substring(0, 50) + '...' : 'none', color, size, category });
+
     // サイズを決定
     const width = 1080;
     const height = size === 'square' ? 1080 : 1920;
@@ -46,11 +48,13 @@ export async function GET(request: NextRequest) {
     if (bg && (bg.startsWith('http://') || bg.startsWith('https://'))) {
       // 外部画像URLの場合、imgタグを使用
       hasBackgroundImage = true;
+      console.log('[compose-banner] Using external image:', bg.substring(0, 100));
     } else {
       // 背景がない場合はグラデーション
       backgroundStyle = {
         background: `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 100%)`,
       };
+      console.log('[compose-banner] Using gradient background:', colors);
     }
 
     return new ImageResponse(

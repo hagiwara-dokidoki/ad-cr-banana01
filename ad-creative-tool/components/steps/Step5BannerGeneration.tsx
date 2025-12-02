@@ -41,6 +41,7 @@ export function Step5BannerGeneration({ project, updateProject, onBack }: Step5B
           // 抽出画像をローテーションで使用
           const imageIndex = i % extractedImages.length;
           backgroundImageUrl = extractedImages[imageIndex];
+          console.log(`[Banner ${i}] Using extracted image:`, backgroundImageUrl);
         }
 
         // テキストを合成してバナーを生成
@@ -54,6 +55,9 @@ export function Step5BannerGeneration({ project, updateProject, onBack }: Step5B
         // 抽出画像がある場合はbgパラメータを追加
         if (backgroundImageUrl) {
           params.append('bg', backgroundImageUrl);
+          console.log(`[Banner ${i}] Full URL with bg:`, `/api/compose-banner?${params.toString()}`);
+        } else {
+          console.log(`[Banner ${i}] No extracted images, using gradient`);
         }
 
         const bannerUrl = `/api/compose-banner?${params.toString()}`;
