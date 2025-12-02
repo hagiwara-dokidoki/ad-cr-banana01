@@ -34,29 +34,39 @@ export function Step5BannerGeneration({ project, updateProject, onBack }: Step5B
       const extractedImages = project.extractedImages || [];
       const useExtractedImages = extractedImages.length > 0;
 
+      // WebP画像をフィルタリング（@vercel/ogが対応していないため）
+      const nonWebPImages = extractedImages.filter(url => {
+        const extension = url.split('.').pop()?.toLowerCase();
+        return extension !== 'webp';
+      });
+      
+      console.log(`[Banner Generation] Total extracted images: ${extractedImages.length}`);
+      console.log(`[Banner Generation] Non-WebP images: ${nonWebPImages.length}`);
+      
+      // 使用可能な画像リスト
+      const availableImages = nonWebPImages.length > 0 ? nonWebPImages : [];
+      const useExtractedImages = availableImages.length > 0;
+      
+      // フォールバック用テスト画像
+      const testImages = [
+        'https://images.unsplash.com/photo-1661956602116-aa6865609028?w=1080',
+        'https://images.unsplash.com/photo-1661956602153-23384936a1d3?w=1080',
+        'https://images.unsplash.com/photo-1661956602868-6ae368943878?w=1080',
+      ];
+
       for (let i = 0; i < count; i++) {
         let backgroundImageUrl = '';
         
-        // テスト用: 常にテスト画像を使用（WebP画像の問題を回避）
-        const testImages = [
-          'https://images.unsplash.com/photo-1661956602116-aa6865609028?w=1080',
-          'https://images.unsplash.com/photo-1661956602153-23384936a1d3?w=1080',
-          'https://images.unsplash.com/photo-1661956602868-6ae368943878?w=1080',
-        ];
-        backgroundImageUrl = testImages[i % testImages.length];
-        console.log(`[Banner ${i}] Using test image (forced):`, backgroundImageUrl);
-        
-        // 以下は一時的にコメントアウト
-        // if (useExtractedImages) {
-        //   // 抽出画像をローテーションで使用
-        //   const imageIndex = i % extractedImages.length;
-        //   backgroundImageUrl = extractedImages[imageIndex];
-        //   console.log(`[Banner ${i}] Using extracted image:`, backgroundImageUrl);
-        // } else {
-        //   // テスト用: 抽出画像がない場合は、テスト画像を使用
-        //   backgroundImageUrl = testImages[i % testImages.length];
-        //   console.log(`[Banner ${i}] Using test image:`, backgroundImageUrl);
-        // }
+        if (useExtractedImages) {
+          // WebP以外の抽出画像をローテーションで使用
+          const imageIndex = i % availableImages.length;
+          backgroundImageUrl = availableImages[imageIndex];
+          console.log(`[Banner ${i}] Using extracted non-WebP image:`, backgroundImageUrl);
+        } else {
+          // 抽出画像がないか全てWebPの場合、テスト画像を使用
+          backgroundImageUrl = testImages[i % testImages.length];
+          console.log(`[Banner ${i}] Using fallback image (no non-WebP images):`, backgroundImageUrl);
+        }
 
         // テキストを合成してバナーを生成
         const params = new URLSearchParams({
