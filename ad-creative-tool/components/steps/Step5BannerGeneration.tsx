@@ -20,6 +20,84 @@ export function Step5BannerGeneration({ project, updateProject, onBack }: Step5B
   const [activeTab, setActiveTab] = useState<'square' | 'vertical'>('square');
   const [banners, setBanners] = useState<Banner[]>(project.banners || []);
 
+  const generateCollageBanners = async (size: 'square' | 'vertical', count: number = 3) => {
+    if (!project.selectedCopy || !project.colors || !project.selectedImages || project.selectedImages.length === 0) {
+      alert('コピー、カラーパレット、選択画像が必要です');
+      return;
+    }
+
+    setGenerating(true);
+    try {
+      const newBanners: Banner[] = [];
+      
+      // 選択された画像（WebPをフィルタリング）
+      const selectedImages = project.selectedImages || [];
+      const nonWebPImages = selectedImages.filter(url => {
+        const extension = url.split('.').pop()?.toLowerCase();
+        return extension !== 'webp';
+      });
+
+      console.log(`[Collage Banner] Selected images: ${selectedImages.length}`);
+      console.log(`[Collage Banner] Non-WebP images: ${nonWebPImages.length}`);
+
+      if (nonWebPImages.length < 2) {
+        alert('コラージュバナーには2枚以上の非WebP画像が必要です');
+        setGenerating(false);
+        return;
+      }
+
+      for (let i = 0; i < count; i++) {
+        // 各コラージュで異なる画像の組み合わせを使用
+        const startIndex = (i * 3) % nonWebPImages.length;
+        const collageImages = [];
+        for (let j = 0; j < Math.min(5, nonWebPImages.length); j++) {
+          const index = (startIndex + j) % nonWebPImages.length;
+          collageImages.push(nonWebPImages[index]);
+        }
+
+        const params = new URLSearchParams({
+          text: project.selectedCopy,
+          color: project.colors.accent,
+          size: size,
+        });
+
+        // 複数画像をカンマ区切りで渡す
+        params.append('bg', collageImages.join(','));
+
+        const bannerUrl = `/api/compose-banner-collage?${params.toString()}`;
+
+        const banner: Banner = {
+          id: `collage-${size}-${i}-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
+          size,
+          backgroundUrl: 'collage',
+          textOverlay: project.selectedCopy,
+          finalImageUrl: bannerUrl,
+          createdAt: new Date(),
+        };
+
+        newBanners.push(banner);
+        
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+
+      const updatedBanners = [...banners, ...newBanners];
+      setBanners(updatedBanners);
+      updateProject({ banners: updatedBanners });
+
+    } catch (error) {
+      console.error('Collage banner generation error:', error);
+      updateProject({
+        status: 'error',
+        error: {
+          message: error instanceof Error ? error.message : 'コラージュバナー生成に失敗しました',
+          step: 'banner-generation',
+        },
+      });
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   const generateBanners = async (size: 'square' | 'vertical', count: number = 5) => {
     if (!project.selectedCopy || !project.colors) {
       alert('コピーとカラーパレットが必要です');
@@ -30,17 +108,17 @@ export function Step5BannerGeneration({ project, updateProject, onBack }: Step5B
     try {
       const newBanners: Banner[] = [];
       
-      // 抽出した画像を使用（存在する場合）
-      const extractedImages = project.extractedImages || [];
+      // ユーザーが選択した画像を使用（selectedImages）
+      const selectedImages = project.selectedImages || [];
 
       // WebP画像をフィルタリング（@vercel/ogが対応していないため）
-      const nonWebPImages = extractedImages.filter(url => {
+      const nonWebPImages = selectedImages.filter(url => {
         const extension = url.split('.').pop()?.toLowerCase();
         return extension !== 'webp';
       });
       
-      console.log(`[Banner Generation] Total extracted images: ${extractedImages.length}`);
-      console.log(`[Banner Generation] Non-WebP images: ${nonWebPImages.length}`);
+      console.log(`[Banner Generation] Selected images: ${selectedImages.length}`);
+      console.log(`[Banner Generation] Non-WebP selected images: ${nonWebPImages.length}`);
       
       // 使用可能な画像リスト
       const availableImages = nonWebPImages.length > 0 ? nonWebPImages : [];
@@ -141,22 +219,55 @@ export function Step5BannerGeneration({ project, updateProject, onBack }: Step5B
       </div>
 
       {/* 生成ボタン */}
-      <div className="flex gap-4">
-        <Button
-          onClick={() => generateBanners('square', 5)}
-          loading={generating}
-          disabled={generating}
-        >
-          Squareバナー生成 (1080x1080)
-        </Button>
-        <Button
-          onClick={() => generateBanners('vertical', 5)}
-          loading={generating}
-          disabled={generating}
-          variant="secondary"
-        >
-          Verticalバナー生成 (1080x1920)
-        </Button>
+      <div className="space-y-4">
+        <div>
+          <h3 className="text-sm font-semibold text-gray-700 mb-2">シングル画像バナー</h3>
+          <div className="flex gap-4">
+            <Button
+              onClick={() => generateBanners('square', 5)}
+              loading={generating}
+              disabled={generating}
+            >
+              Squareバナー生成 (1080x1080)
+            </Button>
+            <Button
+              onClick={() => generateBanners('vertical', 5)}
+              loading={generating}
+              disabled={generating}
+              variant="secondary"
+            >
+              Verticalバナー生成 (1080x1920)
+            </Button>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-sm font-semibold text-gray-700 mb-2">コラージュバナー（複数画像合成）</h3>
+          <div className="flex gap-4">
+            <Button
+              onClick={() => generateCollageBanners('square', 3)}
+              loading={generating}
+              disabled={generating}
+              variant="outline"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              コラージュ Square (1080x1080)
+            </Button>
+            <Button
+              onClick={() => generateCollageBanners('vertical', 3)}
+              loading={generating}
+              disabled={generating}
+              variant="outline"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              コラージュ Vertical (1080x1920)
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* タブ切り替え */}
